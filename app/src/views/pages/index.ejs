@@ -1,0 +1,105 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+    <section class="search-section">
+        <form action="/" method="GET" class="search-box">
+            <i class="fa-solid fa-location-dot search-icon"></i>
+            <input 
+                type="text" 
+                name="city" 
+                placeholder="Enter city name (e.g., Tokyo, New York)..." 
+                value="<%= searchCity || '' %>"
+                required
+                autocomplete="off"
+            />
+            <button type="submit" class="btn-submit">
+                <span>Get Weather</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+    </section>
+
+    <% if (error) { %>
+        <section class="glass-card error-card">
+            <div class="error-content">
+                <i class="fa-solid fa-triangle-exclamation error-icon"></i>
+                <div class="error-text">
+                    <h3>Service Alert</h3>
+                    <p><%= error %></p>
+                </div>
+            </div>
+        </section>
+    <% } %>
+
+    <% if (weather) { %>
+        <section class="glass-card weather-main">
+            <div class="weather-header">
+                <div>
+                    <h1 class="city-name"><%= weather.city %>, <span class="country-code"><%= weather.country %></span></h1>
+                    <p class="last-updated"><i class="fa-regular fa-clock"></i> Updated: <%= weather.lastUpdated %></p>
+                </div>
+                <div class="weather-badge">
+                    <img src="https://openweathermap.org/img/wn/<%= weather.icon %>@2x.png" alt="<%= weather.description %>" class="weather-icon">
+                    <span class="weather-desc"><%= weather.description %></span>
+                </div>
+            </div>
+
+            <div class="hero-temp">
+                <span class="temp-value"><%= weather.temp %></span>
+                <span class="temp-unit">°C</span>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <i class="fa-solid fa-temperature-half metric-icon"></i>
+                    <div class="metric-info">
+                        <span class="metric-label">Feels Like</span>
+                        <span class="metric-value"><%= weather.feelsLike %>°C</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <i class="fa-solid fa-droplet metric-icon"></i>
+                    <div class="metric-info">
+                        <span class="metric-label">Humidity</span>
+                        <span class="metric-value"><%= weather.humidity %>%</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <i class="fa-solid fa-wind metric-icon"></i>
+                    <div class="metric-info">
+                        <span class="metric-label">Wind Speed</span>
+                        <span class="metric-value"><%= weather.windSpeed %> km/h</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <i class="fa-solid fa-gauge-high metric-icon"></i>
+                    <div class="metric-info">
+                        <span class="metric-label">Pressure</span>
+                        <span class="metric-value"><%= weather.pressure %> hPa</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <i class="fa-solid fa-eye metric-icon"></i>
+                    <div class="metric-info">
+                        <span class="metric-label">Visibility</span>
+                        <span class="metric-value"><%= weather.visibility %> km</span>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <i class="fa-solid fa-temperature-arrow-up metric-icon"></i>
+                    <div class="metric-info">
+                        <span class="metric-label">High / Low</span>
+                        <span class="metric-value"><%= weather.tempMax %>° / <%= weather.tempMin %>°</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <% } %>
+</main>
+
+<%- include('../partials/footer') %>
