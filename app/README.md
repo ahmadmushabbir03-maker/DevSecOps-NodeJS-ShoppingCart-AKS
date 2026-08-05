@@ -1,8 +1,36 @@
-# SkyPulse Open-Meteo Weather Dashboard (DevSecOps Ready)
+# 🌤 SkyPulse Weather Dashboard - DevSecOps on Azure Kubernetes Service (AKS)
 
-Zero-secret, glassmorphism-styled Node.js & Express Weather Dashboard using Open-Meteo API. Built for DevSecOps testing (Jenkins, SonarQube, Trivy, Snyk, ACR, AKS, Helm).
+## Overview
 
-## Quick Start
-1. Install dependencies:
-   ```bash
-   npm install
+Production-grade Node.js Weather Dashboard demonstrating an end-to-end DevSecOps pipeline using:
+
+- Node.js
+- Express.js
+- Docker
+- Trivy
+- Jenkins
+- SonarQube
+- Azure DevOps
+- Azure Container Registry (ACR)
+- Azure Kubernetes Service (AKS)
+- Helm
+
+## Features
+
+- Live Weather Search
+- Responsive UI
+- Dockerized Application
+- Security Scanning with Trivy
+- CI/CD Pipeline
+- Kubernetes Deployment
+- Azure Cloud Deployment
+
+## Project Status
+
+✅ Application Development
+
+✅ Docker
+
+✅ Trivy Security Scan
+
+🚧 Azure DevOps CI/CD Pipeline (In Progress)
