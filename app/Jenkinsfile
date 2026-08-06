@@ -33,13 +33,19 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir('app') {
-                    withSonarQubeEnv('SonarQube') {
-                        sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=SkyPulse \
-                        -Dsonar.projectName=SkyPulse \
-                        -Dsonar.sources=.
-                        '''
+                    script {
+
+                        def scannerHome = tool 'SonarScanner'
+
+                        withSonarQubeEnv('SonarQube') {
+
+                            sh """
+                                ${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=SkyPulse \
+                                -Dsonar.projectName=SkyPulse \
+                                -Dsonar.sources=.
+                            """
+                        }
                     }
                 }
             }
@@ -47,12 +53,11 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time:5, unit:'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
-
     }
 
     post {
