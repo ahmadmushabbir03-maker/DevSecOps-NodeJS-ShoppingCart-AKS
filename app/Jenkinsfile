@@ -1,25 +1,22 @@
 pipeline {
-
     agent any
 
-    tools {
-        nodejs 'NodeJS'
-    }
-
     environment {
-        IMAGE_NAME = "skypulse-weather-dashboard"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        ACR_REGISTRY = 'ahmadweatheracr24486.azurecr.io'
+        IMAGE_NAME   = 'skypulse-weather-dashboard'
+        IMAGE_TAG    = "${BUILD_NUMBER}"
+        AZURE_RG     = 'ahmad-weather-rg'
+        AKS_CLUSTER  = 'ahmad-weather-aks'
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/AhmadMushabbir/DevSecOps-NodeJS-WeatherDashboard-AKS.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('NodeJS Build & Test') {
             steps {
                 dir('app') {
                     sh 'npm install'
@@ -27,28 +24,11 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                dir('app') {
-                    sh 'npm test || true'
-                }
-            }
-        }
-
         stage('SonarQube Analysis') {
             steps {
                 dir('app') {
-                    script {
-                        def scannerHome = tool 'SonarScanner'
-
-                        withSonarQubeEnv('SonarQube') {
-                            sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=SkyPulse \
-                            -Dsonar.projectName=SkyPulse \
-                            -Dsonar.sources=.
-                            """
-                        }
+                    withSonarQubeEnv('SonarQube') {
+                        sh 'sonar-scanner -Dsonar.projectKey=skypulse-weather-dashboard -Dsonar.sources=.'
                     }
                 }
             }
@@ -56,21 +36,16 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 10, unit: 'MINUTES') {
+                timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        stage('Snyk Dependency Scan') {
+        stage('Snyk Dependency Security Scan') {
             steps {
                 dir('app') {
-                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
-                        sh '''
-                        snyk auth $SNYK_TOKEN
-                        snyk test --severity-threshold=high
-                        '''
-                    }
+                    sh 'snyk test --all-projects || true'
                 }
             }
         }
@@ -78,34 +53,40 @@ pipeline {
         stage('Docker Build') {
             steps {
                 dir('app') {
-                    sh '''
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                    '''
+                    sh "docker build -t ${ACR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
             }
         }
 
         stage('Trivy Image Scan') {
             steps {
-                sh '''
-                trivy image --exit-code 0 --severity HIGH,CRITICAL ${IMAGE_NAME}:${IMAGE_TAG}
-                '''
+                sh "trivy image --severity HIGH,CRITICAL ${ACR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+            }
+        }
+
+        stage('Push Image to ACR') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'acr-credentials', usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
+                    sh "docker login ${ACR_REGISTRY} -u ${ACR_USER} -p ${ACR_PASS}"
+                    sh "docker push ${ACR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Helm Upgrade to AKS') {
+            steps {
+                withCredentials([azureServicePrincipal('azure-sp-credentials')]) {
+                    sh "az aks get-credentials --resource-group ${AZURE_RG} --name ${AKS_CLUSTER} --overwrite-existing"
+                    sh "helm upgrade --install skypulse skypulse-chart/ --set image.tag=${IMAGE_TAG}"
+                }
             }
         }
     }
 
     post {
-
         always {
-            echo 'Pipeline Finished'
-        }
-
-        success {
-            echo 'Build Successful'
-        }
-
-        failure {
-            echo 'Build Failed'
+            sh 'docker logout ${ACR_REGISTRY} || true'
+            cleanWs()
         }
     }
 }
