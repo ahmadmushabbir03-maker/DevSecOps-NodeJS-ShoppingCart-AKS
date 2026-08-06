@@ -1,29 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: skypulse-app
+  name: {{ .Release.Name }}
   labels:
-    app: skypulse-app
+    app: {{ .Release.Name }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: skypulse-app
+      app: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: skypulse-app
+        app: {{ .Release.Name }}
     spec:
       containers:
       - name: skypulse-app
-        image: ahmadweatheracr24486.azurecr.io/skypulse-weather-dashboard:17
-        imagePullPolicy: Always
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: 3000
+        - containerPort: {{ .Values.service.targetPort }}
         resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
+{{- toYaml .Values.resources | nindent 10 }}
