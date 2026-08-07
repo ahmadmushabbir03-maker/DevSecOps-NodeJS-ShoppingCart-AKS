@@ -1,4 +1,4 @@
-# 🚀 DevSecOps Pipeline for Node.js Shopping Cart Application on Azure Kubernetes Service (AKS)
+# 🚀 DevSecOps Pipeline for Node.js  on Azure Kubernetes Service (AKS)
 
 ![Azure](https://img.shields.io/badge/Cloud-Microsoft%20Azure-0078D4?style=for-the-badge\&logo=microsoftazure)
 ![Jenkins](https://img.shields.io/badge/CI%2FCD-Jenkins-D24939?style=for-the-badge\&logo=jenkins)
@@ -11,7 +11,7 @@
 
 # 📌 Project Overview
 
-This project demonstrates an **end-to-end DevSecOps CI/CD Pipeline** for deploying a **Node.js Shopping Cart Application** to **Azure Kubernetes Service (AKS)**.
+This project demonstrates an **end-to-end DevSecOps CI/CD Pipeline** for deploying a **Node.js ** to **Azure Kubernetes Service (AKS)**.
 
 The pipeline automates application build, testing, security scanning, containerization, image storage, and deployment using **Jenkins, Docker, Azure Container Registry (ACR), Azure Kubernetes Service (AKS), Helm, SonarQube, Snyk, and Trivy**.
 
@@ -22,7 +22,7 @@ The primary objective is to ensure that **only secure, tested, and approved code
 # 🎯 Project Objectives
 
 * Build an automated DevSecOps CI/CD Pipeline
-* Deploy a Node.js Shopping Cart Application on AKS
+* Deploy a Node.js  on AKS
 * Perform Static Code Analysis using SonarQube
 * Scan Dependencies using Snyk
 * Scan Docker Images using Trivy
@@ -85,7 +85,7 @@ Shopping Cart Web Application
 
 # 📖 Architecture Explanation
 
-1. The **Developer** develops the Node.js Shopping Cart Application.
+1. The **Developer** develops the Node.js  Application.
 2. The application source code is pushed to the **GitHub Repository**.
 3. A **GitHub Webhook** automatically triggers the Jenkins pipeline.
 4. Jenkins checks out the source code and installs the required Node.js dependencies.
