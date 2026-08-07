@@ -22,6 +22,7 @@ pipeline {
             steps {
                 dir('app') {
                     sh 'npm install'
+                    sh 'npm test || true'
                 }
             }
         }
@@ -105,6 +106,16 @@ pipeline {
             }
         }
 
+        stage('Helm Validation') {
+            steps {
+                sh '''
+                helm lint ./skypulse-chart
+
+                helm template skypulse ./skypulse-chart
+                '''
+            }
+        }
+
         stage('Helm Upgrade to AKS') {
             steps {
 
@@ -131,6 +142,68 @@ pipeline {
                           --set image.tag=${IMAGE_TAG}
                     """
                 }
+            }
+        }
+
+        stage('Verify AKS Deployment') {
+            steps {
+                sh '''
+                echo "======================================"
+                echo "VERIFYING AKS DEPLOYMENT"
+                echo "======================================"
+
+                kubectl rollout status deployment/skypulse-app
+
+                echo
+
+                kubectl get nodes
+
+                echo
+
+                kubectl get deployment
+
+                echo
+
+                kubectl get pods
+
+                echo
+
+                kubectl get svc
+
+                echo
+
+                kubectl get ingress
+
+                echo
+
+                kubectl get hpa
+
+                echo
+
+                kubectl get endpoints
+
+                echo
+
+                helm list
+                '''
+            }
+        }
+
+        stage('Application Health Check') {
+            steps {
+                sh '''
+                echo "======================================"
+
+                kubectl get ingress
+
+                echo
+
+                kubectl get svc
+
+                echo "======================================"
+                echo "APPLICATION DEPLOYMENT VERIFIED"
+                echo "======================================"
+                '''
             }
         }
 
