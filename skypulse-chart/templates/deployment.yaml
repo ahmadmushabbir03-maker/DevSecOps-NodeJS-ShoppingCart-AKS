@@ -1,26 +1,64 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: {{ .Release.Name }}-app
   labels:
     app: {{ .Release.Name }}-app
+
 spec:
-  {{- if not .Values.autoscaling.enabled }}
+
+{{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
+{{- end }}
+
   selector:
     matchLabels:
       app: {{ .Release.Name }}-app
+
   template:
+
     metadata:
       labels:
         app: {{ .Release.Name }}-app
+
     spec:
+
       containers:
-        - name: skypulse-app
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - containerPort: {{ .Values.service.targetPort }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+
+      - name: skypulse-app
+
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+
+        env:
+        - name: NODE_ENV
+          value: production
+
+        - name: PORT
+          value: "{{ .Values.service.targetPort }}"
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
