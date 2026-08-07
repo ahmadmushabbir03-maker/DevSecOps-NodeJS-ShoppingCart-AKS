@@ -1,18 +1,3 @@
-#!/bin/bash
-set -e
-
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$SCRIPT_DIR"
-
-if [ ! -d ".git" ]; then
-    echo "ERROR: Must be executed inside the root of your Git repository."
-    exit 1
-fi
-
-echo "---> Updating app/Jenkinsfile with explicit SonarQube Scanner Tool path..."
-mkdir -p app
-
-cat << 'EOF' > app/Jenkinsfile
 pipeline {
     agent any
 
@@ -25,6 +10,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -46,9 +32,9 @@ pipeline {
                         def scannerHome = tool 'SonarQube Scanner'
                         withSonarQubeEnv('SonarQube') {
                             sh """
-                                ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=skypulse-weather-dashboard \
-                                -Dsonar.sources=.
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=skypulse-weather-dashboard \
+                            -Dsonar.sources=.
                             """
                         }
                     }
@@ -99,7 +85,7 @@ pipeline {
             steps {
                 withCredentials([azureServicePrincipal('azure-sp-credentials')]) {
                     sh "az aks get-credentials --resource-group ${AZURE_RG} --name ${AKS_CLUSTER} --overwrite-existing"
-                    sh "helm upgrade --install skypulse skypulse-chart/ --set image.tag=${IMAGE_TAG}"
+                    sh "helm upgrade --install skypulse ./skypulse-chart --set image.tag=${IMAGE_TAG}"
                 }
             }
         }
@@ -112,11 +98,3 @@ pipeline {
         }
     }
 }
-EOF
-
-echo "---> Committing and pushing Jenkinsfile update to GitHub..."
-git add app/Jenkinsfile
-git commit -m "fix(jenkinsfile): locate sonar-scanner executable via tool declaration"
-git push origin main
-
-echo "Done! Re-run your Jenkins pipeline job."
